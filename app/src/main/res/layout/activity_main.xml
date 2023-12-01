@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Barra de búsqueda -->
+    <SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:queryHint="Buscar Pokémon"
+        app:iconifiedByDefault="false" />
+
+    <!-- Lista de Pokémon -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:background="@color/pokemon_list_background"/>
+
+    <!-- Detalles del Pokémon seleccionado -->
+    <FrameLayout
+        android:id="@+id/detailsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Contenido de los detalles (puedes utilizar otro RecyclerView, TextView, etc.) -->
+        <!-- Asegúrate de definir los elementos que mostrarás al seleccionar un Pokémon -->
+
+    </FrameLayout>
+
+    <!-- Reloj -->
+    <TextView
+        android:id="@+id/clockTextView"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:textColor="@color/pokemon_clock_text"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+</LinearLayout>
