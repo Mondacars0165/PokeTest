@@ -8,8 +8,11 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.test.poketest.R
-
-class PokemonListAdapter : ListAdapter<PokemonListItem, PokemonListAdapter.PokemonViewHolder>(PokemonDiffCallback()) {
+interface PokemonClickListener {
+    fun onPokemonClick(pokemon: PokemonListItem)
+}
+class PokemonListAdapter(private val clickListener: PokemonClickListener) :
+    ListAdapter<PokemonListItem, PokemonListAdapter.PokemonViewHolder>(PokemonDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PokemonViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_pokemon, parent, false)
@@ -18,20 +21,25 @@ class PokemonListAdapter : ListAdapter<PokemonListItem, PokemonListAdapter.Pokem
 
     override fun onBindViewHolder(holder: PokemonViewHolder, position: Int) {
         val pokemon = getItem(position)
-        holder.bind(pokemon)
+        holder.bind(pokemon, clickListener)
     }
 
     inner class PokemonViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val pokemonNameTextView: TextView = itemView.findViewById(R.id.pokemonNameTextView)
         private val imageViewSprite: ImageView = itemView.findViewById(R.id.imageViewSprite)
 
-        fun bind(pokemon: PokemonListItem) {
+        fun bind(pokemon: PokemonListItem, clickListener: PokemonClickListener) {
             pokemonNameTextView.text = pokemon.name
 
             // Cargar la imagen con Glide
             Glide.with(itemView.context)
                 .load(pokemon.imageUrl)
                 .into(imageViewSprite)
+
+            // Manejar clics en el elemento
+            itemView.setOnClickListener {
+                clickListener.onPokemonClick(pokemon)
+            }
         }
     }
 }

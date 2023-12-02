@@ -1,12 +1,15 @@
 package com.test.poketest
 
 import PokemonApiService
+import PokemonClickListener
 import PokemonListAdapter
 import PokemonListItem
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
+import android.widget.EditText
 import android.widget.FrameLayout
-import android.widget.SearchView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,14 +22,15 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 
-class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
+class MainActivity : AppCompatActivity(), PokemonClickListener {
 
-    private lateinit var searchView: SearchView
+    private lateinit var searchEditText: EditText
     private lateinit var recyclerView: RecyclerView
     private lateinit var detailsContainer: FrameLayout
     private lateinit var clockTextView: TextView
+    private lateinit var detailsTextView: TextView  // Agregamos la referencia al TextView
 
-    private val pokemonListAdapter = PokemonListAdapter()
+    private lateinit var pokemonListAdapter: PokemonListAdapter
     private val apiService = createPokemonApiService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,17 +38,39 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         setContentView(R.layout.activity_main)
 
         // Inicializar vistas
-        searchView = findViewById(R.id.searchView)
+        searchEditText = findViewById(R.id.searchEditText)
         recyclerView = findViewById(R.id.recyclerView)
-        detailsContainer = findViewById(R.id.detailsContainer)
+        detailsContainer = findViewById(R.id.detailsContainer) // Cambiamos el nombre a detailsContainer
         clockTextView = findViewById(R.id.clockTextView)
+        detailsTextView = findViewById(R.id.detailsTextView) // Inicializamos el TextView
 
         // Configurar RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // Inicializar el adaptador después de crear el apiService
+        pokemonListAdapter = PokemonListAdapter(this)
         recyclerView.adapter = pokemonListAdapter
 
         // Configurar búsqueda
-        searchView.setOnQueryTextListener(this)
+        searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // No necesitas hacer nada aquí
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Realiza acciones en respuesta a los cambios de texto
+                val searchText = s.toString()
+                Log.d("MainActivity", "Texto de búsqueda: $searchText")
+
+                // Puedes implementar la lógica de búsqueda aquí
+                // Llama a tu función de búsqueda con el texto actual
+                searchPokemon(searchText)
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // No necesitas hacer nada aquí
+            }
+        })
 
         // Cargar lista de Pokémon inicial
         loadPokemonList()
@@ -111,6 +137,7 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
                     }
                 } else {
                     Log.e("MainActivity", "Respuesta no exitosa en la búsqueda: ${response.code()}")
+                    // Puedes manejar diferentes códigos de error aquí si es necesario
                 }
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -136,16 +163,46 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         return parts[parts.size - 2]
     }
 
-    override fun onQueryTextSubmit(query: String?): Boolean {
-        if (!query.isNullOrBlank()) {
-            searchPokemon(query)
-        }
-        return true
-    }
+    override fun onPokemonClick(pokemon: PokemonListItem) {
+        Log.d("MainActivity", "Clic en el Pokémon: ${pokemon.name}")
+        // Realizar una solicitud para obtener los detalles del Pokémon
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = apiService.getPokemonDetails(pokemon.name)
 
-    override fun onQueryTextChange(newText: String?): Boolean {
-        // Lógica para realizar la búsqueda mientras se escribe
-        // Puedes agregar un límite de tiempo para evitar solicitudes excesivas
-        return true
+                if (response.isSuccessful) {
+                    val pokemonDetails = response.body()
+
+                    withContext(Dispatchers.Main) {
+                        if (pokemonDetails != null) {
+                            Log.d("MainActivity", "Detalles del Pokémon: $pokemonDetails")
+
+                            // Puedes mostrar los detalles del Pokémon en detailsContainer aquí
+                            // Por ejemplo, actualizando un TextView con los detalles
+                            val detailsText = "Detalles del Pokémon:\n" +
+                                    "Nombre: ${pokemonDetails.name}\n" +
+                                    "Altura: ${pokemonDetails.height}\n" +
+                                    "Peso: ${pokemonDetails.weight}\n"
+
+                            // Actualizar el TextView en detailsContainer
+                            runOnUiThread {
+                                detailsTextView.text = detailsText
+                            }
+                        } else {
+                            Log.e("MainActivity", "Los detalles del Pokémon son nulos.")
+                        }
+                    }
+                } else {
+                    Log.e("MainActivity", "Respuesta no exitosa al obtener detalles del Pokémon: ${response.code()}")
+                    // Puedes manejar diferentes códigos de error aquí si es necesario
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                Log.e("MainActivity", "Error de red al obtener detalles del Pokémon: ${e.message}")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.e("MainActivity", "Error al obtener detalles del Pokémon: ${e.message}")
+            }
+        }
     }
 }
