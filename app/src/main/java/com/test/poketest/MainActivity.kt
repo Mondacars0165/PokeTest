@@ -2,6 +2,7 @@ package com.test.poketest
 
 import PokemonApiService
 import PokemonListAdapter
+import PokemonListItem
 import android.os.Bundle
 import android.util.Log
 import android.widget.FrameLayout
@@ -18,8 +19,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 
-
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
 
     private lateinit var searchView: SearchView
     private lateinit var recyclerView: RecyclerView
@@ -44,21 +44,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = pokemonListAdapter
 
         // Configurar búsqueda
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                // Lógica para realizar la búsqueda cuando se envía el formulario
-                if (!query.isNullOrBlank()) {
-                    searchPokemon(query)
-                }
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                // Lógica para realizar la búsqueda mientras se escribe
-                // Puedes agregar un límite de tiempo para evitar solicitudes excesivas
-                return true
-            }
-        })
+        searchView.setOnQueryTextListener(this)
 
         // Cargar lista de Pokémon inicial
         loadPokemonList()
@@ -81,32 +67,28 @@ class MainActivity : AppCompatActivity() {
             try {
                 val response = apiService.getPokemonList(0, 1000)
 
-
-
-                // Verificar si la respuesta es exitosa después de realizar la llamada
                 if (response.isSuccessful) {
                     val pokemonList = response.body()
 
                     withContext(Dispatchers.Main) {
-                        // Verificar si la lista de Pokémon no es nula antes de enviarla al adaptador
                         if (pokemonList != null) {
-                            pokemonListAdapter.submitList(pokemonList.results)
+                            val updatedList = pokemonList.results.map { pokemonListItem ->
+                                val imageUrl = getPokemonImageUrl(pokemonListItem.url)
+                                PokemonListItem(pokemonListItem.name, pokemonListItem.url, imageUrl)
+                            }
+                            pokemonListAdapter.submitList(updatedList)
                         } else {
-                            // Manejar el caso donde la lista es nula
                             Log.e("MainActivity", "La lista de Pokémon es nula.")
                         }
                     }
                 } else {
-                    // Manejar el caso donde la respuesta no es exitosa
                     Log.e("MainActivity", "Respuesta no exitosa: ${response.code()}")
                 }
             } catch (e: IOException) {
                 e.printStackTrace()
-                // Manejar errores de red aquí
                 Log.e("MainActivity", "Error de red al cargar la lista de Pokémon: ${e.message}")
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Manejar otros errores aquí
                 Log.e("MainActivity", "Error al cargar la lista de Pokémon: ${e.message}")
             }
         }
@@ -117,30 +99,24 @@ class MainActivity : AppCompatActivity() {
             try {
                 val response = apiService.getPokemonDetails(query)
 
-                // Verificar si la respuesta de búsqueda es exitosa
                 if (response.isSuccessful) {
                     val pokemonDetails = response.body()
 
                     withContext(Dispatchers.Main) {
-                        // Puedes manejar los detalles del Pokémon aquí, por ejemplo, mostrar en el detalleContainer
                         if (pokemonDetails != null) {
                             Log.d("MainActivity", "Detalles del Pokémon: $pokemonDetails")
                         } else {
-                            // Manejar el caso donde los detalles son nulos
                             Log.e("MainActivity", "Los detalles del Pokémon son nulos.")
                         }
                     }
                 } else {
-                    // Manejar el caso donde la respuesta no es exitosa
                     Log.e("MainActivity", "Respuesta no exitosa en la búsqueda: ${response.code()}")
                 }
             } catch (e: IOException) {
                 e.printStackTrace()
-                // Manejar errores de red aquí
                 Log.e("MainActivity", "Error de red al buscar el Pokémon: ${e.message}")
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Manejar otros errores aquí
                 Log.e("MainActivity", "Error al buscar el Pokémon: ${e.message}")
             }
         }
@@ -148,5 +124,28 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateClock() {
         // Implementa la lógica para actualizar el reloj aquí
+    }
+
+    private fun getPokemonImageUrl(pokemonUrl: String): String {
+        val pokemonId = extractPokemonIdFromUrl(pokemonUrl)
+        return "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$pokemonId.png"
+    }
+
+    private fun extractPokemonIdFromUrl(pokemonUrl: String): String {
+        val parts = pokemonUrl.split("/")
+        return parts[parts.size - 2]
+    }
+
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        if (!query.isNullOrBlank()) {
+            searchPokemon(query)
+        }
+        return true
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        // Lógica para realizar la búsqueda mientras se escribe
+        // Puedes agregar un límite de tiempo para evitar solicitudes excesivas
+        return true
     }
 }

@@ -2,15 +2,28 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="16dp">
 
+
+
+    <!-- ImageView para mostrar la imagen del Pokémon -->
+    <ImageView
+        android:id="@+id/imageViewSprite"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_gravity="start"
+        android:scaleType="centerCrop" />
     <TextView
         android:id="@+id/pokemonNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:layout_gravity="center_vertical"
         android:textColor="#000000" />
 
     <!-- Puedes agregar más vistas aquí según tus necesidades -->

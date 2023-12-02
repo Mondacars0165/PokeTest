@@ -11,7 +11,8 @@ data class PokemonListResponse(
 
 data class PokemonListItem(
     val name: String,
-    val url: String
+    val url: String,
+    val imageUrl: String
 )
 data class PokemonDetails(
     val id: Int,
@@ -36,7 +37,6 @@ data class Sprites(
     val backDefault: String,
     @SerializedName("back_shiny")
     val backShiny: String
-    // Puedes agregar más atributos según sea necesario
 )
 
 data class Type(
