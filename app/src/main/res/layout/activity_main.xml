@@ -30,10 +30,46 @@
     <FrameLayout
         android:id="@+id/detailsContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp">
 
-        <!-- Contenido de los detalles (puedes utilizar otro RecyclerView, TextView, etc.) -->
-        <!-- Asegúrate de definir los elementos que mostrarás al seleccionar un Pokémon -->
+        <!-- Contenido de los detalles -->
+        <ImageView
+            android:id="@+id/pokemonImage"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_launcher_foreground" />
+
+        <TextView
+            android:id="@+id/pokemonName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text=""
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+
+
+        <TextView
+            android:id="@+id/pokemonHeight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text=""
+            android:textSize="16sp"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/pokemonWeight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text=""
+            android:textSize="16sp"
+            android:layout_marginTop="8dp" />
+
 
     </FrameLayout>
 

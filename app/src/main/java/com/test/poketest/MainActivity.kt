@@ -1,200 +1,152 @@
 package com.test.poketest
 
+import PokemonApiService
+import PokemonListAdapter
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.material3.icons.Icons
-import androidx.compose.material3.icons.filled.Search
-import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
-import com.test.poketest.api.PokemonApi
-import com.test.poketest.api.model.PokemonDetailsResponse
-import com.test.poketest.ui.theme.PokeTestTheme
+import android.util.Log
+import android.widget.FrameLayout
+import android.widget.SearchView
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
 
-class MainActivity : ComponentActivity() {
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var searchView: SearchView
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var detailsContainer: FrameLayout
+    private lateinit var clockTextView: TextView
+
+    private val pokemonListAdapter = PokemonListAdapter()
+    private val apiService = createPokemonApiService()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            PokeTestTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    PokemonListScreen()
+        setContentView(R.layout.activity_main)
+
+        // Inicializar vistas
+        searchView = findViewById(R.id.searchView)
+        recyclerView = findViewById(R.id.recyclerView)
+        detailsContainer = findViewById(R.id.detailsContainer)
+        clockTextView = findViewById(R.id.clockTextView)
+
+        // Configurar RecyclerView
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = pokemonListAdapter
+
+        // Configurar búsqueda
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                // Lógica para realizar la búsqueda cuando se envía el formulario
+                if (!query.isNullOrBlank()) {
+                    searchPokemon(query)
                 }
+                return true
             }
-        }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                // Lógica para realizar la búsqueda mientras se escribe
+                // Puedes agregar un límite de tiempo para evitar solicitudes excesivas
+                return true
+            }
+        })
+
+        // Cargar lista de Pokémon inicial
+        loadPokemonList()
+
+        // Actualizar el reloj
+        updateClock()
     }
-}
 
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun PokemonListScreen() {
-    var searchQuery by remember { mutableStateOf("") }
-    var pokemonDetails by remember { mutableStateOf<PokemonDetailsResponse?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
+    private fun createPokemonApiService(): PokemonApiService {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://pokeapi.co/api/v2/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
-    val scope = rememberCoroutineScope()
+        return retrofit.create(PokemonApiService::class.java)
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Search Bar
-        SearchBar(
-            searchQuery = searchQuery,
-            onSearchQueryChange = { newQuery ->
-                searchQuery = newQuery
-            },
-            onSearchPerform = {
-                if (searchQuery.isNotEmpty()) {
-                    // Perform API call to get Pokémon details based on the searchQuery
-                    scope.launch(Dispatchers.IO) {
-                        isLoading = true
-                        try {
-                            val response = PokemonApi.pokemonApiService.getPokemonDetails(searchQuery)
-                            pokemonDetails = response
-                        } catch (e: Exception) {
-                            // Handle error
-                        } finally {
-                            isLoading = false
+    private fun loadPokemonList() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = apiService.getPokemonList(0, 1000)
+
+
+
+                // Verificar si la respuesta es exitosa después de realizar la llamada
+                if (response.isSuccessful) {
+                    val pokemonList = response.body()
+
+                    withContext(Dispatchers.Main) {
+                        // Verificar si la lista de Pokémon no es nula antes de enviarla al adaptador
+                        if (pokemonList != null) {
+                            pokemonListAdapter.submitList(pokemonList.results)
+                        } else {
+                            // Manejar el caso donde la lista es nula
+                            Log.e("MainActivity", "La lista de Pokémon es nula.")
                         }
                     }
+                } else {
+                    // Manejar el caso donde la respuesta no es exitosa
+                    Log.e("MainActivity", "Respuesta no exitosa: ${response.code()}")
                 }
-            }
-        )
-
-        // Pokemon Details
-        if (isLoading) {
-            // Show loading indicator
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .size(50.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-        } else {
-            // Display Pokémon details
-            pokemonDetails?.let {
-                PokemonDetailsCard(it)
+            } catch (e: IOException) {
+                e.printStackTrace()
+                // Manejar errores de red aquí
+                Log.e("MainActivity", "Error de red al cargar la lista de Pokémon: ${e.message}")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Manejar otros errores aquí
+                Log.e("MainActivity", "Error al cargar la lista de Pokémon: ${e.message}")
             }
         }
     }
-}
 
-@Composable
-fun SearchBar(
-    searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
-    onSearchPerform: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        TextField(
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp),
-            value = searchQuery,
-            onValueChange = {
-                onSearchQueryChange(it)
-            },
-            placeholder = {
-                Text(text = "Search Pokémon")
-            },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Search,
-                keyboardType = KeyboardType.Text
-            ),
-            keyboardActions = KeyboardActions(
-                onSearch = {
-                    onSearchPerform()
-                }
-            ),
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search Icon"
-                )
-            },
-            trailingIcon = {
-                if (searchQuery.isNotEmpty()) {
-                    IconButton(
-                        onClick = {
-                            onSearchQueryChange("")
+    private fun searchPokemon(query: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = apiService.getPokemonDetails(query)
+
+                // Verificar si la respuesta de búsqueda es exitosa
+                if (response.isSuccessful) {
+                    val pokemonDetails = response.body()
+
+                    withContext(Dispatchers.Main) {
+                        // Puedes manejar los detalles del Pokémon aquí, por ejemplo, mostrar en el detalleContainer
+                        if (pokemonDetails != null) {
+                            Log.d("MainActivity", "Detalles del Pokémon: $pokemonDetails")
+                        } else {
+                            // Manejar el caso donde los detalles son nulos
+                            Log.e("MainActivity", "Los detalles del Pokémon son nulos.")
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear Icon"
-                        )
                     }
+                } else {
+                    // Manejar el caso donde la respuesta no es exitosa
+                    Log.e("MainActivity", "Respuesta no exitosa en la búsqueda: ${response.code()}")
                 }
-            },
-            singleLine = true,
-            colors = TextFieldDefaults.textFieldColors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            )
-        )
-
-        // Search button
-        Button(
-            onClick = {
-                onSearchPerform()
-            },
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .heightIn(min = 48.dp),
-        ) {
-            Text(text = "Search")
+            } catch (e: IOException) {
+                e.printStackTrace()
+                // Manejar errores de red aquí
+                Log.e("MainActivity", "Error de red al buscar el Pokémon: ${e.message}")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Manejar otros errores aquí
+                Log.e("MainActivity", "Error al buscar el Pokémon: ${e.message}")
+            }
         }
     }
-}
 
-@Composable
-fun PokemonDetailsCard(pokemonDetails: PokemonDetailsResponse) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        elevation = 8.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "Name: ${pokemonDetails.name}",
-                style = MaterialTheme.typography.h6
-            )
-            Text(
-                text = "ID: ${pokemonDetails.id}",
-                style = MaterialTheme.typography.body1
-            )
-            Text(
-                text = "Types: ${pokemonDetails.types.joinToString { it.type.name }}",
-                style = MaterialTheme.typography.body1
-            )
-            Text(
-                text = "Abilities: ${pokemonDetails.abilities.joinToString
+    private fun updateClock() {
+        // Implementa la lógica para actualizar el reloj aquí
+    }
+}
