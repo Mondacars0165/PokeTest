@@ -32,7 +32,6 @@ data class Sprites(
     val frontDefault: String,
     @SerializedName("front_shiny")
     val frontShiny: String,
-    // Nuevos atributos para las imágenes
     @SerializedName("back_default")
     val backDefault: String,
     @SerializedName("back_shiny")

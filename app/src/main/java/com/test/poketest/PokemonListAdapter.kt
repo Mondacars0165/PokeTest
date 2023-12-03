@@ -33,12 +33,9 @@ class PokemonListAdapter(private val clickListener: PokemonClickListener) :
         fun bind(pokemon: PokemonListItem, clickListener: PokemonClickListener) {
             pokemonNameTextView.text = pokemon.name
 
-            // Cargar la imagen con Glide
             Glide.with(itemView.context)
                 .load(pokemon.imageUrl)
                 .into(imageViewSprite)
-
-            // Manejar clics en el elemento
             itemView.setOnClickListener {
                 clickListener.onPokemonClick(pokemon)
             }

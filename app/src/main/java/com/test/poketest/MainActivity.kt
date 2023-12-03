@@ -51,11 +51,7 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
         detailsTextView = findViewById(R.id.detailsTextView)
         detailsContainer = findViewById(R.id.detailsContainer)
         val textClock = findViewById<TextView>(R.id.textClock)
-
-        // Configurar RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
-
-        // Inicializar el adaptador después de crear el apiService
         pokemonListAdapter = PokemonListAdapter(this)
         recyclerView.adapter = pokemonListAdapter
 
@@ -72,28 +68,21 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
             }
         })
 
-        // Configurar búsqueda
+        // Configuración búsqueda
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // No necesitas hacer nada aquí
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Realiza acciones en respuesta a los cambios de texto
                 val searchText = s.toString()
                 Log.d("MainActivity", "Texto de búsqueda: $searchText")
                 searchPokemon(searchText)
             }
-
             override fun afterTextChanged(s: Editable?) {
-                // No necesitas hacer nada aquí
             }
         })
-
-        // Cargar lista de Pokémon inicial
+        // Carga lista de Pokémon inicial
         loadPokemonList()
-
-
         updateClock(textClock)
     }
 
@@ -138,25 +127,21 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
         }
     }
 
+    //función de busqueda pokemon
     private fun searchPokemon(query: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // Intenta convertir el query a un número (ID) o utiliza -1 si no es posible
                 val pokemonId = query.toIntOrNull() ?: -1
-
-                // Usa el ID si es positivo, de lo contrario, busca por nombre
                 val response =
                     if (pokemonId > 0) apiService.getPokemonDetails(pokemonId.toString())
                     else apiService.getPokemonDetailsByName(query)
-
                 if (response.isSuccessful) {
                     val pokemonDetails = response.body()
-
                     withContext(Dispatchers.Main) {
                         if (pokemonDetails != null) {
                             Log.d("MainActivity", "Detalles del Pokémon: $pokemonDetails")
 
-                            // Inflar la vista del modal
+                            // llenar la vista del modal
                             val modalView = layoutInflater.inflate(R.layout.modal_pokemon_details, null)
                             val modalImageView: ImageView = modalView.findViewById(R.id.modalPokemonImage)
                             val modalNameTextView: TextView = modalView.findViewById(R.id.modalPokemonName)
@@ -165,10 +150,8 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                             val modalAbilitiesTextView: TextView = modalView.findViewById(R.id.modalPokemonAbilities)
                             val modalBaseExperienceTextView: TextView = modalView.findViewById(R.id.modalPokemonBaseExperience)
 
-                            // Obtén la URL de la imagen del sprite que desees mostrar (por ejemplo, la imagen frontal)
                             val imageUrl = pokemonDetails.sprites.frontDefault
 
-                            // Usa Glide para cargar la imagen en el ImageView
                             Glide.with(this@MainActivity)
                                 .load(imageUrl)
                                 .into(modalImageView)
@@ -176,8 +159,6 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                             modalNameTextView.text = pokemonDetails.name
                             modalHeightTextView.text = " ${pokemonDetails.height}"
                             modalWeightTextView.text = " ${pokemonDetails.weight}"
-
-                            // Obtener solo los nombres de las habilidades
                             val abilitiesNames = pokemonDetails.abilities.map { it.ability.name }
                             val abilitiesText = abilitiesNames.joinToString(", ")
 
@@ -222,8 +203,6 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                     // Obtener la hora actual
                     val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
                     val currentTime = dateFormat.format(Date())
-
-                    // Actualizar el TextView con la hora actual
                     textClock.text = "Hora actual: $currentTime"
 
                     // Programar la próxima actualización después de 1 minuto
@@ -271,7 +250,7 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                         if (pokemonDetails != null) {
                             Log.d("MainActivity", "Detalles del Pokémon: $pokemonDetails")
 
-                            // Inflar la vista del modal
+                            // llenar la vista del modal
                             val modalView = layoutInflater.inflate(R.layout.modal_pokemon_details, null)
                             val modalImageView: ImageView = modalView.findViewById(R.id.modalPokemonImage)
                             val modalNameTextView: TextView = modalView.findViewById(R.id.modalPokemonName)
@@ -279,11 +258,8 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                             val modalWeightTextView: TextView = modalView.findViewById(R.id.modalPokemonWeight)
                             val modalAbilitiesTextView: TextView = modalView.findViewById(R.id.modalPokemonAbilities)
                             val modalBaseExperienceTextView: TextView = modalView.findViewById(R.id.modalPokemonBaseExperience)
-
-                            // Obtén la URL de la imagen del sprite que desees mostrar (por ejemplo, la imagen frontal)
                             val imageUrl = pokemonDetails.sprites.frontDefault
 
-                            // Usa Glide para cargar la imagen en el ImageView
                             Glide.with(this@MainActivity)
                                 .load(imageUrl)
                                 .into(modalImageView)
@@ -315,7 +291,6 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                     }
                 } else {
                     Log.e("MainActivity", "Respuesta no exitosa al obtener detalles del Pokémon: ${response.code()}")
-                    // Puedes manejar diferentes códigos de error aquí si es necesario
                 }
             } catch (e: IOException) {
                 e.printStackTrace()

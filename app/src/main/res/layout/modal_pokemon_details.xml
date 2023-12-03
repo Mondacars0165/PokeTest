@@ -26,7 +26,6 @@
             android:layout_width="124dp"
             android:layout_height="131dp"
             android:layout_gravity="center"
-            android:contentDescription="@string/image_description"
             android:scaleType="fitCenter" />
 
 
@@ -112,7 +111,7 @@
             </TableRow>
         </TableLayout>
 
-        <!-- Agregar el botón para cerrar el modal -->
+        <!-- botón para cerrar el modal -->
         <Button
             android:id="@+id/btnCloseModal"
             android:layout_width="wrap_content"
