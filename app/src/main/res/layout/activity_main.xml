@@ -5,9 +5,11 @@
     android:layout_height="match_parent">
 
     <!-- Barra de búsqueda -->
+
+    <!-- Lista de Pokémon y ModalContainer -->
     <EditText
         android:id="@+id/searchEditText"
-        android:layout_width="match_parent"
+        android:layout_width="222dp"
         android:layout_height="38dp"
         android:layout_marginTop="16dp"
         android:background="#FFFFFF"
@@ -17,7 +19,19 @@
         android:imeOptions="actionSearch"
         android:inputType="text" />
 
-    <!-- Lista de Pokémon y ModalContainer -->
+    <TextView
+        android:id="@+id/textClock"
+        android:layout_width="187dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/searchEditText"
+        android:layout_alignParentEnd="true"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginStart="7dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="-5dp"
+        android:layout_marginBottom="8dp"
+        android:layout_toEndOf="@+id/searchEditText" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -27,7 +41,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
-            android:layout_height="669dp"
+            android:layout_height="673dp"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
             android:layout_weight="1"
@@ -70,10 +84,12 @@
         android:id="@+id/detailsTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginEnd="74dp"
+        android:layout_toStartOf="@+id/textClock"
         android:text=""
-        android:textSize="16sp"
         android:textColor="@android:color/black"
-        android:layout_gravity="center"/>
+        android:textSize="16sp" />
 
 
 </RelativeLayout>

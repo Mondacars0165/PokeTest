@@ -5,9 +5,12 @@ import PokemonClickListener
 import PokemonListAdapter
 import PokemonListItem
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -23,6 +26,9 @@ import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity(), PokemonClickListener {
 
@@ -44,6 +50,7 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
         recyclerView = findViewById(R.id.recyclerView)
         detailsTextView = findViewById(R.id.detailsTextView)
         detailsContainer = findViewById(R.id.detailsContainer)
+        val textClock = findViewById<TextView>(R.id.textClock)
 
         // Configurar RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -86,8 +93,8 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
         // Cargar lista de Pokémon inicial
         loadPokemonList()
 
-        // Actualizar el reloj
-        updateClock()
+
+        updateClock(textClock)
     }
 
     private fun createPokemonApiService(): PokemonApiService {
@@ -102,7 +109,7 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
     private fun loadPokemonList() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = apiService.getPokemonList(0, 1000)
+                val response = apiService.getPokemonList(0, 12000)
 
                 if (response.isSuccessful) {
                     val pokemonList = response.body()
@@ -181,6 +188,11 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                             runOnUiThread {
                                 detailsContainer.removeAllViews()
                                 detailsContainer.addView(modalView)
+                                val btnCloseModal: Button = modalView.findViewById(R.id.btnCloseModal)
+                                btnCloseModal.setOnClickListener {
+                                    detailsContainer.removeAllViews()
+                                }
+
                             }
 
                         } else {
@@ -201,9 +213,28 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
         }
     }
 
-    private fun updateClock() {
-        // Implementa la lógica para actualizar el reloj aquí
+    private fun updateClock(textClock: TextView) {
+        val handler = Handler(Looper.getMainLooper())
+
+        handler.post(object : Runnable {
+            override fun run() {
+                try {
+                    // Obtener la hora actual
+                    val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                    val currentTime = dateFormat.format(Date())
+
+                    // Actualizar el TextView con la hora actual
+                    textClock.text = "Hora actual: $currentTime"
+
+                    // Programar la próxima actualización después de 1 minuto
+                    handler.postDelayed(this, 60000)  // 60000 milisegundos = 1 minuto
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        })
     }
+
 
     private fun getPokemonImageUrl(pokemonUrl: String): String {
         val pokemonId = extractPokemonIdFromUrl(pokemonUrl)
@@ -272,6 +303,10 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                             runOnUiThread {
                                 detailsContainer.removeAllViews()
                                 detailsContainer.addView(modalView)
+                                val btnCloseModal: Button = modalView.findViewById(R.id.btnCloseModal)
+                                btnCloseModal.setOnClickListener {
+                                    detailsContainer.removeAllViews()
+                                }
                             }
 
                         } else {
