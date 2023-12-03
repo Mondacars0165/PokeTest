@@ -1,66 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/modalContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:layout_width="407dp"
+        android:layout_height="331dp"
+        android:layout_gravity="center"
+        android:background="#E3DCDC"
         android:orientation="vertical"
         android:padding="16dp"
-        android:layout_gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.5"
-        app:layout_constraintHorizontal_bias="0.5">
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5">
 
         <!-- ImageView para la imagen del Pokémon -->
         <ImageView
             android:id="@+id/modalPokemonImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/image_description"
+            android:layout_width="124dp"
+            android:layout_height="131dp"
             android:layout_gravity="center"
+            android:contentDescription="@string/image_description"
             android:scaleType="fitCenter" />
 
 
-        <TextView
-            android:id="@+id/modalPokemonName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nombre del Pokémon"
-            android:layout_gravity="center"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp"/>
 
-        <TextView
-            android:id="@+id/modalPokemonHeight"
-            android:layout_width="wrap_content"
+        <!-- TableLayout para mostrar detalles del Pokémon -->
+        <TableLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Altura del Pokémon"
             android:layout_gravity="center"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="8dp"
+            android:stretchColumns="1">
 
-        <TextView
-            android:id="@+id/modalPokemonWeight"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Peso del Pokémon"
-            android:layout_gravity="center"
-            android:layout_marginTop="4dp"/>
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nombre del Pokémon:"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/modalPokemonName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+            <!-- Fila para Peso -->
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Peso del Pokémon:"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/modalPokemonWeight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <!-- Fila para Altura -->
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Altura del Pokémon:"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/modalPokemonHeight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <!-- Fila para Habilidades -->
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Habilidades del Pokémon:"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/modalPokemonAbilities"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <!-- Fila para Experiencia Base -->
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Experiencia Base del Pokémon:"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/modalPokemonBaseExperience"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+        </TableLayout>
 
         <!-- Agregar el botón para cerrar el modal -->
         <Button
             android:id="@+id/btnCloseModal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cerrar"
+            android:layout_height="35dp"
             android:layout_gravity="center"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp"
+            android:text="Cerrar" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

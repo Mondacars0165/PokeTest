@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -34,6 +33,7 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
 
     private lateinit var pokemonListAdapter: PokemonListAdapter
     private val apiService = createPokemonApiService()
+    private var isLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +52,19 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
         pokemonListAdapter = PokemonListAdapter(this)
         recyclerView.adapter = pokemonListAdapter
 
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val totalItemCount = layoutManager.itemCount
+                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+
+                if (!isLoading && totalItemCount <= (lastVisibleItem + 5)) {
+                    searchPokemon(searchEditText.text.toString())
+                }
+            }
+        })
+
         // Configurar búsqueda
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -62,9 +75,6 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                 // Realiza acciones en respuesta a los cambios de texto
                 val searchText = s.toString()
                 Log.d("MainActivity", "Texto de búsqueda: $searchText")
-
-                // Puedes implementar la lógica de búsqueda aquí
-                // Llama a tu función de búsqueda con el texto actual
                 searchPokemon(searchText)
             }
 
@@ -145,15 +155,24 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                             val modalNameTextView: TextView = modalView.findViewById(R.id.modalPokemonName)
                             val modalHeightTextView: TextView = modalView.findViewById(R.id.modalPokemonHeight)
                             val modalWeightTextView: TextView = modalView.findViewById(R.id.modalPokemonWeight)
+                            val modalAbilitiesTextView: TextView = modalView.findViewById(R.id.modalPokemonAbilities)
+                            val modalBaseExperienceTextView: TextView = modalView.findViewById(R.id.modalPokemonBaseExperience)
 
                             // Configurar la vista del modal con los detalles del Pokémon
                             Glide.with(this@MainActivity)
-                                .load(getPokemonImageUrl(pokemonDetails.sprites.frontDefault))
+                                .load(getPokemonImageUrlFromOfficialArtwork(pokemonDetails.name))
                                 .into(modalImageView)
 
                             modalNameTextView.text = pokemonDetails.name
-                            modalHeightTextView.text = "Altura: ${pokemonDetails.height}"
-                            modalWeightTextView.text = "Peso: ${pokemonDetails.weight}"
+                            modalHeightTextView.text = " ${pokemonDetails.height}"
+                            modalWeightTextView.text = " ${pokemonDetails.weight}"
+
+                            // Obtener solo los nombres de las habilidades
+                            val abilitiesNames = pokemonDetails.abilities.map { it.ability.name }
+                            val abilitiesText = abilitiesNames.joinToString(", ")
+
+                            modalAbilitiesTextView.text = " $abilitiesText"
+                            modalBaseExperienceTextView.text = " ${pokemonDetails.baseExperience}"
 
                             // Mostrar el modal
                             runOnUiThread {
@@ -193,6 +212,17 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
         return parts[parts.size - 2]
     }
 
+    private fun getPokemonImageUrlFromOfficialArtwork(pokemonName: String): String {
+        return "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${getPokemonIdFromName(pokemonName)}.png"
+    }
+
+    private fun getPokemonIdFromName(pokemonName: String): Int {
+        val name = pokemonName.toLowerCase()
+        val regex = Regex("[^a-zA-Z0-9]")
+        val cleanName = regex.replace(name, "")
+        return cleanName.hashCode() and 0x7fffffff
+    }
+
     override fun onPokemonClick(pokemon: PokemonListItem) {
         Log.d("MainActivity", "Clic en el Pokémon: ${pokemon.name}")
 
@@ -213,15 +243,24 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                             val modalNameTextView: TextView = modalView.findViewById(R.id.modalPokemonName)
                             val modalHeightTextView: TextView = modalView.findViewById(R.id.modalPokemonHeight)
                             val modalWeightTextView: TextView = modalView.findViewById(R.id.modalPokemonWeight)
+                            val modalAbilitiesTextView: TextView = modalView.findViewById(R.id.modalPokemonAbilities)
+                            val modalBaseExperienceTextView: TextView = modalView.findViewById(R.id.modalPokemonBaseExperience)
 
                             // Configurar la vista del modal con los detalles del Pokémon
                             Glide.with(this@MainActivity)
-                                .load(getPokemonImageUrl(pokemonDetails.sprites.frontDefault))
+                                .load(getPokemonImageUrlFromOfficialArtwork(pokemonDetails.name))
                                 .into(modalImageView)
-                            modalImageView.visibility = View.VISIBLE
+
                             modalNameTextView.text = pokemonDetails.name
-                            modalHeightTextView.text = "Altura: ${pokemonDetails.height}"
-                            modalWeightTextView.text = "Peso: ${pokemonDetails.weight}"
+                            modalHeightTextView.text = " ${pokemonDetails.height}"
+                            modalWeightTextView.text = " ${pokemonDetails.weight}"
+
+                            // Obtener solo los nombres de las habilidades
+                            val abilitiesNames = pokemonDetails.abilities.map { it.ability.name }
+                            val abilitiesText = abilitiesNames.joinToString(", ")
+
+                            modalAbilitiesTextView.text = " $abilitiesText"
+                            modalBaseExperienceTextView.text = " ${pokemonDetails.baseExperience}"
 
                             // Mostrar el modal
                             runOnUiThread {
