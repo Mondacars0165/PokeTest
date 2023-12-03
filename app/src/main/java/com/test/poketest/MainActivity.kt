@@ -158,9 +158,12 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                             val modalAbilitiesTextView: TextView = modalView.findViewById(R.id.modalPokemonAbilities)
                             val modalBaseExperienceTextView: TextView = modalView.findViewById(R.id.modalPokemonBaseExperience)
 
-                            // Configurar la vista del modal con los detalles del Pokémon
+                            // Obtén la URL de la imagen del sprite que desees mostrar (por ejemplo, la imagen frontal)
+                            val imageUrl = pokemonDetails.sprites.frontDefault
+
+                            // Usa Glide para cargar la imagen en el ImageView
                             Glide.with(this@MainActivity)
-                                .load(getPokemonImageUrlFromOfficialArtwork(pokemonDetails.name))
+                                .load(imageUrl)
                                 .into(modalImageView)
 
                             modalNameTextView.text = pokemonDetails.name
@@ -246,9 +249,12 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                             val modalAbilitiesTextView: TextView = modalView.findViewById(R.id.modalPokemonAbilities)
                             val modalBaseExperienceTextView: TextView = modalView.findViewById(R.id.modalPokemonBaseExperience)
 
-                            // Configurar la vista del modal con los detalles del Pokémon
+                            // Obtén la URL de la imagen del sprite que desees mostrar (por ejemplo, la imagen frontal)
+                            val imageUrl = pokemonDetails.sprites.frontDefault
+
+                            // Usa Glide para cargar la imagen en el ImageView
                             Glide.with(this@MainActivity)
-                                .load(getPokemonImageUrlFromOfficialArtwork(pokemonDetails.name))
+                                .load(imageUrl)
                                 .into(modalImageView)
 
                             modalNameTextView.text = pokemonDetails.name
