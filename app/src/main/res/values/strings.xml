@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PokeTest</string>
+    <string name="image_description">Descripción de la imagen</string>
 </resources>

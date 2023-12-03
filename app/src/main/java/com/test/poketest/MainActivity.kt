@@ -10,10 +10,12 @@ import android.text.TextWatcher
 import android.util.Log
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,7 +30,7 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
     private lateinit var recyclerView: RecyclerView
     private lateinit var detailsContainer: FrameLayout
     private lateinit var clockTextView: TextView
-    private lateinit var detailsTextView: TextView  // Agregamos la referencia al TextView
+    private lateinit var detailsTextView: TextView
 
     private lateinit var pokemonListAdapter: PokemonListAdapter
     private val apiService = createPokemonApiService()
@@ -40,9 +42,9 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
         // Inicializar vistas
         searchEditText = findViewById(R.id.searchEditText)
         recyclerView = findViewById(R.id.recyclerView)
-        detailsContainer = findViewById(R.id.detailsContainer) // Cambiamos el nombre a detailsContainer
+        detailsContainer = findViewById(R.id.detailsContainer)
         clockTextView = findViewById(R.id.clockTextView)
-        detailsTextView = findViewById(R.id.detailsTextView) // Inicializamos el TextView
+        detailsTextView = findViewById(R.id.detailsTextView)
 
         // Configurar RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -131,6 +133,27 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                     withContext(Dispatchers.Main) {
                         if (pokemonDetails != null) {
                             Log.d("MainActivity", "Detalles del Pokémon: $pokemonDetails")
+
+                            // Inflar la vista del modal
+                            val modalView = layoutInflater.inflate(R.layout.modal_pokemon_details, null)
+                            val modalImageView: ImageView = modalView.findViewById(R.id.modalPokemonImage)
+                            val modalNameTextView: TextView = modalView.findViewById(R.id.modalPokemonName)
+                            val modalHeightTextView: TextView = modalView.findViewById(R.id.modalPokemonHeight)
+                            val modalWeightTextView: TextView = modalView.findViewById(R.id.modalPokemonWeight)
+
+                            // Configurar la vista del modal con los detalles del Pokémon
+                            Glide.with(this@MainActivity)
+                                .load(getPokemonImageUrl(pokemonDetails.sprites.frontDefault))
+                                .into(modalImageView)
+
+                            modalNameTextView.text = pokemonDetails.name
+                            modalHeightTextView.text = "Altura: ${pokemonDetails.height}"
+                            modalWeightTextView.text = "Peso: ${pokemonDetails.weight}"
+
+                            // Mostrar el modal
+                            detailsContainer.removeAllViews()
+                            detailsContainer.addView(modalView)
+
                         } else {
                             Log.e("MainActivity", "Los detalles del Pokémon son nulos.")
                         }
@@ -165,7 +188,7 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
 
     override fun onPokemonClick(pokemon: PokemonListItem) {
         Log.d("MainActivity", "Clic en el Pokémon: ${pokemon.name}")
-        // Realizar una solicitud para obtener los detalles del Pokémon
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response = apiService.getPokemonDetails(pokemon.name)
@@ -177,17 +200,26 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                         if (pokemonDetails != null) {
                             Log.d("MainActivity", "Detalles del Pokémon: $pokemonDetails")
 
-                            // Puedes mostrar los detalles del Pokémon en detailsContainer aquí
-                            // Por ejemplo, actualizando un TextView con los detalles
-                            val detailsText = "Detalles del Pokémon:\n" +
-                                    "Nombre: ${pokemonDetails.name}\n" +
-                                    "Altura: ${pokemonDetails.height}\n" +
-                                    "Peso: ${pokemonDetails.weight}\n"
+                            // Inflar la vista del modal
+                            val modalView = layoutInflater.inflate(R.layout.modal_pokemon_details, null)
+                            val modalImageView: ImageView = modalView.findViewById(R.id.modalPokemonImage)
+                            val modalNameTextView: TextView = modalView.findViewById(R.id.modalPokemonName)
+                            val modalHeightTextView: TextView = modalView.findViewById(R.id.modalPokemonHeight)
+                            val modalWeightTextView: TextView = modalView.findViewById(R.id.modalPokemonWeight)
 
-                            // Actualizar el TextView en detailsContainer
-                            runOnUiThread {
-                                detailsTextView.text = detailsText
-                            }
+                            // Configurar la vista del modal con los detalles del Pokémon
+                            Glide.with(this@MainActivity)
+                                .load(getPokemonImageUrl(pokemonDetails.sprites.frontDefault))
+                                .into(modalImageView)
+
+                            modalNameTextView.text = pokemonDetails.name
+                            modalHeightTextView.text = "Altura: ${pokemonDetails.height}"
+                            modalWeightTextView.text = "Peso: ${pokemonDetails.weight}"
+
+                            // Mostrar el modal
+                            detailsContainer.removeAllViews()
+                            detailsContainer.addView(modalView)
+
                         } else {
                             Log.e("MainActivity", "Los detalles del Pokémon son nulos.")
                         }
