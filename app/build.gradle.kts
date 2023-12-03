@@ -55,7 +55,6 @@ android {
 
     configurations.all {
         resolutionStrategy {
-            // Puedes dejar esta sección vacía por ahora
         }
     }
 }
