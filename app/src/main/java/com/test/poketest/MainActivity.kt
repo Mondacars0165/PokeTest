@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -29,7 +30,6 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
     private lateinit var searchEditText: EditText
     private lateinit var recyclerView: RecyclerView
     private lateinit var detailsContainer: FrameLayout
-    private lateinit var clockTextView: TextView
     private lateinit var detailsTextView: TextView
 
     private lateinit var pokemonListAdapter: PokemonListAdapter
@@ -42,9 +42,8 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
         // Inicializar vistas
         searchEditText = findViewById(R.id.searchEditText)
         recyclerView = findViewById(R.id.recyclerView)
-        detailsContainer = findViewById(R.id.detailsContainer)
-        clockTextView = findViewById(R.id.clockTextView)
         detailsTextView = findViewById(R.id.detailsTextView)
+        detailsContainer = findViewById(R.id.detailsContainer)
 
         // Configurar RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -125,7 +124,13 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
     private fun searchPokemon(query: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = apiService.getPokemonDetails(query)
+                // Intenta convertir el query a un número (ID) o utiliza -1 si no es posible
+                val pokemonId = query.toIntOrNull() ?: -1
+
+                // Usa el ID si es positivo, de lo contrario, busca por nombre
+                val response =
+                    if (pokemonId > 0) apiService.getPokemonDetails(pokemonId.toString())
+                    else apiService.getPokemonDetailsByName(query)
 
                 if (response.isSuccessful) {
                     val pokemonDetails = response.body()
@@ -151,8 +156,10 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                             modalWeightTextView.text = "Peso: ${pokemonDetails.weight}"
 
                             // Mostrar el modal
-                            detailsContainer.removeAllViews()
-                            detailsContainer.addView(modalView)
+                            runOnUiThread {
+                                detailsContainer.removeAllViews()
+                                detailsContainer.addView(modalView)
+                            }
 
                         } else {
                             Log.e("MainActivity", "Los detalles del Pokémon son nulos.")
@@ -211,14 +218,16 @@ class MainActivity : AppCompatActivity(), PokemonClickListener {
                             Glide.with(this@MainActivity)
                                 .load(getPokemonImageUrl(pokemonDetails.sprites.frontDefault))
                                 .into(modalImageView)
-
+                            modalImageView.visibility = View.VISIBLE
                             modalNameTextView.text = pokemonDetails.name
                             modalHeightTextView.text = "Altura: ${pokemonDetails.height}"
                             modalWeightTextView.text = "Peso: ${pokemonDetails.weight}"
 
                             // Mostrar el modal
-                            detailsContainer.removeAllViews()
-                            detailsContainer.addView(modalView)
+                            runOnUiThread {
+                                detailsContainer.removeAllViews()
+                                detailsContainer.addView(modalView)
+                            }
 
                         } else {
                             Log.e("MainActivity", "Los detalles del Pokémon son nulos.")

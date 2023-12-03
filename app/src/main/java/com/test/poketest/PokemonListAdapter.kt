@@ -8,9 +8,11 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.test.poketest.R
+
 interface PokemonClickListener {
     fun onPokemonClick(pokemon: PokemonListItem)
 }
+
 class PokemonListAdapter(private val clickListener: PokemonClickListener) :
     ListAdapter<PokemonListItem, PokemonListAdapter.PokemonViewHolder>(PokemonDiffCallback()) {
 

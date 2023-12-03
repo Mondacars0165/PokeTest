@@ -1,7 +1,6 @@
-<!-- modal_pokemon_details.xml -->
-
-<RelativeLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -9,17 +8,26 @@
         android:id="@+id/modalContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
         android:background="@android:color/white"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:layout_gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.5">
 
+        <!-- ImageView para la imagen del Pokémon -->
         <ImageView
             android:id="@+id/modalPokemonImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/image_description"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:scaleType="fitCenter" />
+
 
         <TextView
             android:id="@+id/modalPokemonName"
@@ -45,8 +53,14 @@
             android:text="Peso del Pokémon"
             android:layout_gravity="center"
             android:layout_marginTop="4dp"/>
+
+        <!-- Agregar el botón para cerrar el modal -->
+        <Button
+            android:id="@+id/btnCloseModal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cerrar"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"/>
     </LinearLayout>
-
-    <!-- Otras vistas y layouts que puedas necesitar -->
-
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
